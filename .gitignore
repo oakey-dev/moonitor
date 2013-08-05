@@ -1,0 +1,12 @@
+# hidden files
+.*
+
+# Object files
+*.o
+*.so.*
+
+# bin-files
+node/bin/
+node/plugins/lib/
+database/bin/
+
