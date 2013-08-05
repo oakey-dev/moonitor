@@ -1,5 +1,7 @@
 CC=gcc
 CFLAGS=-c -g
+BINDIR=bin
+
 daemon: daemon.o collector.o
 	$(CC) -pthread daemon.o collector.o -o bin/daemon
 
@@ -10,4 +12,7 @@ collector.o: collector.c
 	$(CC) $(CFLAGS) collector.c
 
 clean:
-	rm *.o bin/daemon
+	rm -rf *.o $(BINDIR)
+
+$(BINDIR):
+	mkdir $(BINDIR)
