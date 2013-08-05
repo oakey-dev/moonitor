@@ -1,6 +1,8 @@
 #ifndef _COLLECTOR_H_
 #define _COLLECTOR_H_
 
+#include <semaphore.h>
+
 struct plugin {
    int interval;
    sem_t* lock;

@@ -11,14 +11,17 @@
 
 #include "collector.h"
 
-int munin_cpu() {
-   printf("cpu");
+int dummy_cpu() {
+   printf("> cpu\n");
+   return 0;
 }
-int munin_load() {
-   printf("load");
+int dummy_load() {
+   printf("> load\n");
+   return 0;
 }
-int munin_memory() {
-   printf("memory");
+int dummy_memory() {
+   printf("> memory\n");
+   return 0;
 }
 
 
@@ -32,7 +35,7 @@ void* collector_thread(void* arg) {
    // init queue
    que = malloc(sizeof(struct queue));
    if ( que == NULL ) {
-      debug("!! not enough memory");
+      fprintf(stderr, "Critical: not enough memory!");
       exit(1);
    }
    que->timestamp = 0;
@@ -45,19 +48,19 @@ void* collector_thread(void* arg) {
 
       p = malloc(sizeof(struct plugin));
       p->interval = 60;
-      p->cmd = &munin_load; 
+      p->cmd = &dummy_load; 
       que->plugins[i] = p;
       i++;
 
       p = malloc(sizeof(struct plugin));
       p->interval = 30;
-      p->cmd = &munin_memory; 
+      p->cmd = &dummy_memory; 
       que->plugins[i] = p;
       i++;
 
       p = malloc(sizeof(struct plugin));
       p->interval = 10;
-      p->cmd = &munin_cpu; 
+      p->cmd = &dummy_cpu; 
       que->plugins[i] = p;
       i++;
 

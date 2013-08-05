@@ -1,15 +1,20 @@
 #include <stdio.h>
 #include <string.h>
+#include "../database.h"
 
 #define LOADAVG_BUFFER_SIZE 128
 
-int init()
-{
-   
+int init() {
+   return eql_exec(
+            "CREATE TABLE IF NOT EXISTS cpu_avg (\
+               time  TIMESTAMP PRIMARY KEY DEFAULT CURRENT_TIMESTAMP,\
+               avg1  INTEGER,\
+               avg5  INTEGER,\
+               avg15 INTEGER\
+            );");
 }
 
-int run()
-{
+int run() {
    int spaces=0, i = 0; // counters
    char* current;
    FILE* pFile;
@@ -22,10 +27,10 @@ int run()
    }
    
    //buffer = "INSERT INTO cpu_kram (timestamp,col1,col2,col3) (time(),"
-   strcpy(buffer, "INSERT INTO cpu_kram (avg1,avg5,avg15) (");
+   strcpy(buffer, "INSERT INTO cpu_kram (avg1,avg5,avg15) VALUES (");
 
    // try to read file
-   current = buffer+41;
+   current = buffer+48; 
    if ( fgets(current, LOADAVG_BUFFER_SIZE, pFile) == NULL ) {
       return 2;
    }
@@ -51,9 +56,8 @@ int run()
 
    // close string
    *current = ')'; current++;
-   *current = '\n'; current++;
+   *current = ';'; current++;
    *current = '\0';
 
-  printf("%s",buffer);
-
+   return sql_exec(buffer);
 }
