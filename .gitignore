@@ -6,6 +6,7 @@
 *.so.*
 
 # bin-files
+node/node.db
 node/bin/
 node/plugins/lib/
 database/bin/
