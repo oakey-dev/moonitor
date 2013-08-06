@@ -2,7 +2,7 @@
 #include <string.h>
 #include "../database.h"
 
-#define LOADAVG_BUFFER_SIZE 128
+#define LOADAVG_BUFFER_SIZE 80 // size for loadavg 48+2+3*(7+3)
 
 int init() {
    return eql_exec(
