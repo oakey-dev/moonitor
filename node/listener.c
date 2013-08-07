@@ -12,6 +12,7 @@
 #define BACKLOG 1024 /* maximum queue length for the listening socket */
 
 char* ps = "moonitor>"; /* prompt string */
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 void* listener_thread(void* p_arg){
 	assert(sizeof(void*) >= sizeof(int));
@@ -37,6 +38,7 @@ void* listener_thread(void* p_arg){
 
 	int status;
 	for(;;){ /* listen for incoming connections, open a session for each one */
+		pthread_mutex_lock(&lock);
 		consock = accept(sock,(struct sockaddr*)&addr,&socksize);
 		if(consock<0){
 			perror("error accepting connections on socket");
@@ -44,9 +46,13 @@ void* listener_thread(void* p_arg){
 #ifndef NDEBUG
 		printf("sockshell main thread (thread id:%ld) accepted connection\n",(long)pthread_self());
 #endif
-		status = pthread_create(&last_session,NULL,session,(void*)consock);
+		status = pthread_create(&last_session,NULL,session,&consock);
 		if(status != 0){
 			pthread_error(status,"error creating thread for sockshell session");
+			pthread_mutex_unlock(&lock); 
+			/* ensure that program continues to run
+			 * even if the new thread fails to run
+			 */
 		}
 	}
 
@@ -56,7 +62,8 @@ void* listener_thread(void* p_arg){
 void* session(void* p_sock){
 	char buf[BUFSIZE+1];
 	buf[BUFSIZE] = '\0'; /* ensure proper string termination */
-	int consock = (int)p_sock;
+	int consock = *(int*)p_sock;
+	pthread_mutex_unlock(&lock); /* allow creation of next thread */
 
 	pthread_detach(pthread_self());
 
