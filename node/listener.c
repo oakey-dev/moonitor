@@ -13,7 +13,7 @@
 
 char* ps = "moonitor>"; /* prompt string */
 
-void* start_sockshell(void* p_arg){
+void* listener_thread(void* p_arg){
 	assert(sizeof(void*) >= sizeof(int));
 	int consock;
 	pthread_t last_session;

@@ -3,7 +3,7 @@
 #include "daemon.h"
 #include "database.h"
 #include "collector.h"
-//#include "listener.h"
+#include "listener.h"
 
 int main(int argc, char* argv[]) {
    // TODO: args auswerten
@@ -13,6 +13,8 @@ int main(int argc, char* argv[]) {
    }
 
 
+   pthread_t last_thread;
+   pthread_create(&last_thread,NULL,listener_thread,NULL);
    collector_thread(NULL);
    
    sql_close();
