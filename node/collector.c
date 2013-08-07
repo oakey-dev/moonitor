@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
 #include <sqlite3.h>
@@ -92,18 +93,18 @@ void* collector_thread(void* arg) {
                      int ret = (p->cmd)();
                      sem_post(p->lock);
                      if ( ret != 0 ) {
-                        fprintf(stderr, "Error: Command %x returned error code %d\n", p->cmd, ret);
+                        fprintf(stderr, "Error: Command %p returned error code %d\n", p->cmd, ret);
                      }
                   }
                   else if ( pid < 0 ) { // error forking
-                     fprintf(stderr, "Error: could not fork daemon %x", p->cmd);
+                     fprintf(stderr, "Error: could not fork daemon %p", p->cmd);
                      sem_post(p->lock);
                      exit(1);
                   }
                   exit(0); // don't wait!
                }
                else if ( pid < 0 ) { // error forking
-                  fprintf(stderr, "Error: could not fork child %x", p->cmd);
+                  fprintf(stderr, "Error: could not fork child %p", p->cmd);
                   sem_post(p->lock);
                }
                else {
@@ -114,7 +115,7 @@ void* collector_thread(void* arg) {
             }
             // throw error if service is still running and re-add in one sec.
             else {
-               fprintf(stderr, "Error: runtime for %x is to short (%d)\n", p->cmd, p->interval);
+               fprintf(stderr, "Error: runtime for %p is to short (%d)\n", p->cmd, p->interval);
                queue_add(que, p, (time_t)(time(NULL)+1));
             }
          }
