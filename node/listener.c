@@ -74,6 +74,10 @@ void* session(void* p_sock){
 	while(status>=0){
 		status = nwrite(consock,ps,strlen(ps));
 		read(consock,buf,BUFSIZE);
+		if(buf[0] == 0x04 /* EOT, ^D */){
+			nwrite(consock,"bye",4);
+			break;
+		}
 	}
 
 	if(close(consock) != 0){
