@@ -7,7 +7,7 @@
 sqlite3* sqlite_db;
 
 int sql_open() {
-   if( sqlite3_open(DEFAULT_PATH, &sqlite_db) ){
+   if ( sqlite3_open(DEFAULT_PATH, &sqlite_db) ) {
       fprintf(stderr, "Critical: Can't open database: %s\n", sqlite3_errmsg(sqlite_db));
       sqlite3_close(sqlite_db);
       return 1;

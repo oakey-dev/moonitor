@@ -1,38 +1,48 @@
 #include <stdio.h>
 #include <string.h>
-#include "../database.h"
 
-#define LOADAVG_BUFFER_SIZE 80 // size for loadavg 48+2+3*(7+3)
+// size for loadavg 46 + 3*(7+3)-1 + 2
+#define LOADAVG_BUFFER_SIZE 78
 
-int init() {
-   return eql_exec(
-            "CREATE TABLE IF NOT EXISTS cpu_avg (\
-               time  TIMESTAMP PRIMARY KEY DEFAULT CURRENT_TIMESTAMP,\
-               avg1  INTEGER,\
-               avg5  INTEGER,\
-               avg15 INTEGER\
-            );");
+char* init() {
+   return "CREATE TABLE IF NOT EXISTS cpu_avg (\
+             time  TIMESTAMP PRIMARY KEY DEFAULT CURRENT_TIMESTAMP,\
+             avg1  INTEGER,\
+             avg5  INTEGER,\
+             avg15 INTEGER\
+          );";
 }
 
-int run() {
+int default_interval() {
+   return 60;
+}
+
+char* run() {
    int spaces=0, i = 0; // counters
    char* current;
    FILE* pFile;
-   char buffer[LOADAVG_BUFFER_SIZE];
+   char* buffer = malloc(LOADAVG_BUFFER_SIZE*sizeof(char));
+   // return if malloc returns NULL
+   if ( buffer == NULL ) { 
+      fprintf(stderr, "Error in cpu_avg: not enough memory\n");
+      return NULL;
+   }
 
    // open /proc/loadavg for reading
    pFile = fopen("/proc/loadavg", "r");
    if ( pFile == NULL ) {
-      return 1;
+      fprintf(stderr, "Error in cpu_avg: can't open file /proc/loadavg\n");
+      return NULL;
    }
    
    //buffer = "INSERT INTO cpu_kram (timestamp,col1,col2,col3) (time(),"
-   strcpy(buffer, "INSERT INTO cpu_kram (avg1,avg5,avg15) VALUES (");
+   strcpy(buffer, "INSERT INTO cpu_avg (avg1,avg5,avg15) VALUES (");
 
    // try to read file
-   current = buffer+48; 
+   current = buffer+46; 
    if ( fgets(current, LOADAVG_BUFFER_SIZE, pFile) == NULL ) {
-      return 2;
+      fprintf(stderr, "Error in cpu_avg: can't open read file /proc/loadavg\n");
+      return NULL;
    }
 
    // close pFile
@@ -51,7 +61,8 @@ int run() {
    
    // error with content (does not contain 3 values)
    if(spaces != 3) {
-      return 3;
+      fprintf(stderr, "Error in cpu_avg: reading /proc/loadavg invalid content?\n");
+      return NULL;
    }
 
    // close string
@@ -59,5 +70,5 @@ int run() {
    *current = ';'; current++;
    *current = '\0';
 
-   return sql_exec(buffer);
+   return buffer;
 }
