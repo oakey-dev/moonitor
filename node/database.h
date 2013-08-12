@@ -1,6 +1,7 @@
 #ifndef _DATABASE_H_
 #define _DATABASE_H_
 
+int sql_init();
 int sql_open();
 void sql_close();
 

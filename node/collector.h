@@ -19,5 +19,6 @@ struct queue {
 void* collector_thread(void* arg);
 struct queue* queue_add(struct queue* que, struct plugin* p, time_t time);
 void load_plugins(struct queue* que);
+void unload_plugins();
 
 #endif
