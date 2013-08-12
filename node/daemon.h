@@ -7,6 +7,4 @@
 
 
 
-void stop(void);
-
 #endif /* _DAEMON_H_ */

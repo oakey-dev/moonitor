@@ -231,5 +231,21 @@ void load_plugins(struct queue* que) {
    // close pointer-array
    que->plugins[i] = NULL;
    plugins[i] = NULL;
+   atexit(unload_plugins); // unloading 
 }
 
+void unload_plugins(void) {
+   int i;
+   struct plugin* p;
+   // close lib-handles and sem
+   for ( i = 0; (p = plugins[i]) != NULL; i++ ) {
+      dlclose(p->handle);
+      
+      char str[sizeof(void*)*2+1];
+      snprintf(str, (sizeof(void*)*2+10), "/moonit%p", p->cmd);
+      // overwrite 0x infront of the pointer
+      *(str+7) = 'o';
+      *(str+8) = 'r';
+      sem_unlink(str);
+   }
+}
