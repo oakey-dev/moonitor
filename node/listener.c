@@ -74,17 +74,22 @@ void* session(void* p_sock){
 	while(status>=0){
 		status = nwrite(consock,ps,strlen(ps));
 		read(consock,buf,BUFSIZE);
-		if(buf[0] == 0x04 /* EOT, ^D */){
-			nwrite(consock,"bye",4);
-			break;
-		}
 		/* TODO implement commands
+		 * - help [command]
 		 * - plugins: list all plugins (SELECT id FROM plugin)
 		 * - config ${plugin}: (SELECT * FROM config WHERE id = ${plugin})
 		 * - select ${plugin} [$from_date] [$to_date]: (SELECT * FROM ${plugin} [WHERE timestamp >= ${from_date} [AND timestamp <= ${to_date}]])
 		 */
 		if(strncmp(buf,"plugins",strlen("plugins")) == 0){
 			db_query("SELECT id FROM plugin",&consock);
+		}
+		else if(buf[0] == 0x04 /* EOT, ^D */
+				|| strncmp(buf,"exit",strlen("exit"))
+				|| strncmp(buf,"quit",strlen("quit"))
+		       )
+		{
+			nwrite(consock,"bye\n",5);
+			break;
 		}
 	}
 
