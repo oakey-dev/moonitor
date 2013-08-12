@@ -5,7 +5,7 @@ int sql_init();
 int sql_open();
 void sql_close();
 
-// vor first version / tests
+// for first version / tests
 int sql_exec(char* sql);
 
 // TODO: replace sql_exec with:

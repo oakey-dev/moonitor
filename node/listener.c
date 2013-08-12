@@ -74,6 +74,18 @@ void* session(void* p_sock){
 	while(status>=0){
 		status = nwrite(consock,ps,strlen(ps));
 		read(consock,buf,BUFSIZE);
+		if(buf[0] == 0x04 /* EOT, ^D */){
+			nwrite(consock,"bye",4);
+			break;
+		}
+		/* TODO implement commands
+		 * - plugins: list all plugins (SELECT id FROM plugin)
+		 * - config ${plugin}: (SELECT * FROM config WHERE id = ${plugin})
+		 * - select ${plugin} [$from_date] [$to_date]: (SELECT * FROM ${plugin} [WHERE timestamp >= ${from_date} [AND timestamp <= ${to_date}]])
+		 */
+		if(strncmp(buf,"plugins",strlen("plugins")) == 0){
+			db_query("SELECT id FROM plugin",&consock);
+		}
 	}
 
 	if(close(consock) != 0){
@@ -101,4 +113,26 @@ int nwrite(int fd, const void* buf,size_t count){
 
 void catch_sigpipe(int i){
 	printf("caught SIGPIPE\n");
+}
+
+int callback(void* p_sock, int column_count, char** column_text, char** column_names){
+	int sock = *(int*)p_sock;
+	int i;
+	for(i=0;i<column_count;i++){
+		nwrite(sock,column_names[i],strlen(column_names[i]));
+		nwrite(sock,"=",strlen("="));
+		nwrite(sock,column_text[i],strlen(column_text[i]));
+		nwrite(sock,"\n",strlen("\n"));
+	}
+	return 0;
+}
+
+int db_query(char* query,int* p_sock){
+	char* errMsg = NULL;
+	if ( sqlite3_exec(sqlite_db, query, callback, p_sock, &errMsg) != SQLITE_OK ) {
+		fprintf(stderr, "SQL error: %s\n", errMsg);
+		sqlite3_free(errMsg);
+		return 1;
+	}
+	return 0;
 }
