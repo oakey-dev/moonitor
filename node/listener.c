@@ -33,8 +33,19 @@ void* listener_thread(void* p_arg){
 	addr.sin_port = htons(DEFAULT_PORT);
 
 	int sock = socket(AF_INET,SOCK_STREAM,0);
-	bind(sock,(struct sockaddr*)&addr,sizeof(addr));
-	listen(sock,BACKLOG);
+	if(sock < 0){ //TODO refine error handling
+		perror("error creating socket. terminating sockshell thread.");
+		return NULL;
+	}
+	if( 0 != bind(sock,(struct sockaddr*)&addr,sizeof(addr))){ //TODO refine error handling
+		perror("error binding to DEFAULT_HOST:DEFAULT_PORT. terminating sockshell thread.");
+		return NULL;
+		
+	}
+	if( 0 != listen(sock,BACKLOG)){ //TODO refine error handling
+		perror("error listening on socket. terminating sockshell thread.");
+		return NULL;
+	}
 
 	int status;
 	for(;;){ /* listen for incoming connections, open a session for each one */
@@ -77,7 +88,7 @@ void* session(void* p_sock){
 		/* TODO implement commands
 		 * - help [command]
 		 * - plugins: list all plugins (SELECT id FROM plugin)
-		 * - config ${plugin}: (SELECT * FROM config WHERE id = ${plugin})
+		 * - config ${plugin}: (SELECT * FROM plugin WHERE id = ${plugin}; SELECT * FROM config WHERE id = ${plugin})
 		 * - select ${plugin} [$from_date] [$to_date]: (SELECT * FROM ${plugin} [WHERE timestamp >= ${from_date} [AND timestamp <= ${to_date}]])
 		 */
 		if(strncmp(buf,"plugins",strlen("plugins")) == 0){
